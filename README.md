@@ -1,6 +1,8 @@
 # MyTracer
 MyTracer is my university project about application of volumetric visualization algorithms with ray tracing without hardware support (Nvidia RT/AMD RA cores).
 
+Currently supports triangulated meshes in .obj format.
+
 ![MyTracerCover](https://sun9-15.userapi.com/impg/BJ-if0QxpoFISeyRfuyIvpV_hr6oGZgTJ7-6Mg/oRm0q5h1YBU.jpg?size=977x534&quality=96&sign=9fa5ef2c4da078855f60473904c1e9de&type=album)
 
 # Walnut
@@ -20,6 +22,15 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 - [Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files]
 - [Open MyTracer.sln]
 - [IF OPENCL BRANCH: click "Add existing property sheet" and add "OpenCL.props" file]
+- [Run Releasex64]
+
+## Adding Meshes
+- [Create mesh in Blender or something]
+- [Apply "triangulate" modifier]
+- [Export scene as .obj file]
+- [Open WalnutApp.cpp]
+- [Go to ExampleLayer() constructor and add .obj file in the same way as current meshes]
+- [Comment out unnecessary meshes]
 - [Run Releasex64]
 
 ### 3rd party libaries
