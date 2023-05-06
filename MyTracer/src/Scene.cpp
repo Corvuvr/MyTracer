@@ -1,4 +1,4 @@
-#include "Scene.h"
+#include "Scene.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,20 +13,19 @@ void Mesh::loadMesh(const char* filename)
     {
         std::cerr << "Cannot open " << filename << std::endl;
         exit(1);
-
     }
     std::string line;
-    glm::vec3 vert;
-    std::vector<glm::vec3> verts;
+    cl_float3 vert;
+    std::vector<cl_float3> verts;
     std::vector<int> faceIndex;
     std::vector<int> textureIndex;
 
-    glm::vec3 maxXYZ, minXYZ;
+    cl_float3 maxXYZ, minXYZ;
     maxXYZ.x = FLT_MIN;
     maxXYZ.y = FLT_MIN;
     maxXYZ.z = FLT_MIN;
-    minXYZ.z = FLT_MAX;
-    minXYZ.z = FLT_MAX;
+    minXYZ.x = FLT_MAX;
+    minXYZ.y = FLT_MAX;
     minXYZ.z = FLT_MAX;
 
 
@@ -94,7 +93,7 @@ void Mesh::loadMesh(const char* filename)
     for (unsigned int i = 0; i < faceIndex.size() - 2; i += 3)
     {
         //общая сторона - i0i2
-        Triangle triangle;
+        struct Triangle triangle;
         triangle.v0 = verts[faceIndex[i + 0]];
         triangle.v2 = verts[faceIndex[i + 2]];
         triangle.v1 = verts[faceIndex[i + 1]];
@@ -103,7 +102,7 @@ void Mesh::loadMesh(const char* filename)
 
     }
 
-    this->boundingBox = BoundingBox(maxXYZ, minXYZ);
-    std::cout << maxXYZ.x << " " << maxXYZ.y << " " << maxXYZ.z << "\n";
-    std::cout << minXYZ.x << " " << minXYZ.y << " " << minXYZ.z << "\n";
+    //this->boundingBox = BoundingBox(maxXYZ, minXYZ);
+    //std::cout << maxXYZ.x << " " << maxXYZ.y << " " << maxXYZ.z << "\n";
+    //std::cout << minXYZ.x << " " << minXYZ.y << " " << minXYZ.z << "\n";
 }

@@ -11,7 +11,3 @@ bin-int/
 
 # Exclude
 !vendor/bin
-
-# Ignore any files in /bin and /obj Folders
-**/bin/*
-**/bin-int/*

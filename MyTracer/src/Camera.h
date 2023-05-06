@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-
+#include "CL/cl.h"
 class Camera
 {
 public:
@@ -20,6 +20,7 @@ public:
 	const glm::vec3& GetDirection() const { return m_ForwardDirection; }
 
 	const std::vector<glm::vec3>& GetRayDirections() const { return m_RayDirections; }
+	const std::vector<cl_float3>& GetClRayDirections() const { return m_cl_RayDirections; }
 
 	float GetRotationSpeed();
 private:
@@ -36,11 +37,13 @@ private:
 	float m_NearClip = 0.1f;
 	float m_FarClip = 100.0f;
 
-	glm::vec3 m_Position{0.0f, 0.0f, 0.0f};
+	glm::vec3 m_Position	{ 0.0f, 0.0f, 0.0f };
+	//cl_float3 m_cl_Position	{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 m_ForwardDirection{0.0f, 0.0f, 0.0f};
 
 	// Cached ray directions
 	std::vector<glm::vec3> m_RayDirections;
+	std::vector<cl_float3> m_cl_RayDirections;
 
 	glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };
 

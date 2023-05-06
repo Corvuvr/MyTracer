@@ -11,8 +11,8 @@ using namespace Walnut;
 Camera::Camera(float verticalFOV, float nearClip, float farClip)
 	: m_VerticalFOV(verticalFOV), m_NearClip(nearClip), m_FarClip(farClip)
 {
-	m_ForwardDirection = glm::vec3(0, 0, -1);
-	m_Position = glm::vec3(0, 0, 6);
+	m_ForwardDirection	= glm::vec3(0, 0,-1);
+	m_Position			= glm::vec3(0, 0, 6);
 }
 
 bool Camera::OnUpdate(float ts)
@@ -122,6 +122,7 @@ void Camera::RecalculateView()
 void Camera::RecalculateRayDirections()
 {
 	m_RayDirections.resize(m_ViewportWidth * m_ViewportHeight);
+	m_cl_RayDirections.resize(m_ViewportWidth * m_ViewportHeight);
 
 	for (uint32_t y = 0; y < m_ViewportHeight; y++)
 	{
@@ -133,6 +134,7 @@ void Camera::RecalculateRayDirections()
 			glm::vec4 target = m_InverseProjection * glm::vec4(coord.x, coord.y, 1, 1);
 			glm::vec3 rayDirection = glm::vec3(m_InverseView * glm::vec4(glm::normalize(glm::vec3(target) / target.w), 0)); // World space
 			m_RayDirections[x + y * m_ViewportWidth] = rayDirection;
+			m_cl_RayDirections[x + y * m_ViewportWidth] = { rayDirection.x, rayDirection.y, rayDirection.z };
 		}
 	}
 }
