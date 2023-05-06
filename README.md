@@ -1,7 +1,7 @@
 # MyTracer
 MyTracer is my university project about application of volumetric visualization algorithms with ray tracing without hardware support (Nvidia RT/AMD RA cores).
 
-![MyTracerCover](https://sun9-14.userapi.com/impg/CspSGHMbvq9si0zMiWSVmgLWRM0nQftbKlp1Gw/yFYknR-8CFI.jpg?size=747x603&quality=96&sign=39031ca97b7b06a351e371bdf5e1a769&type=album)
+![MyTracerCover](https://sun9-15.userapi.com/impg/BJ-if0QxpoFISeyRfuyIvpV_hr6oGZgTJ7-6Mg/oRm0q5h1YBU.jpg?size=977x534&quality=96&sign=9fa5ef2c4da078855f60473904c1e9de&type=album)
 
 # Walnut
 
