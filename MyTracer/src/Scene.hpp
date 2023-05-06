@@ -1,5 +1,5 @@
 #pragma once
-#include "CL/cl.hpp"
+#include "CL/cl.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>

@@ -21,12 +21,12 @@ void Mesh::loadMesh(const char* filename)
     std::vector<int> textureIndex;
 
     cl_float3 maxXYZ, minXYZ;
-    maxXYZ.x = FLT_MIN;
-    maxXYZ.y = FLT_MIN;
-    maxXYZ.z = FLT_MIN;
-    minXYZ.x = FLT_MAX;
-    minXYZ.y = FLT_MAX;
-    minXYZ.z = FLT_MAX;
+    maxXYZ.s[0] = FLT_MIN;
+    maxXYZ.s[1] = FLT_MIN;
+    maxXYZ.s[2] = FLT_MIN;
+    minXYZ.s[0] = FLT_MAX;
+    minXYZ.s[1] = FLT_MAX;
+    minXYZ.s[2] = FLT_MAX;
 
 
     while (std::getline(in, line))
@@ -37,18 +37,18 @@ void Mesh::loadMesh(const char* filename)
             std::istringstream v(line.substr(2));
             
             double x, y, z;
-            v >> vert.x; v >> vert.y; v >> vert.z;
+            v >> vert.s[0]; v >> vert.s[1]; v >> vert.s[2];
             verts.push_back(vert);
 
             // getting minXYZ and maxXYZ
 
-            if (vert.x > maxXYZ.x) maxXYZ.x = vert.x;
-            if (vert.y > maxXYZ.y) maxXYZ.y = vert.y;
-            if (vert.z > maxXYZ.z) maxXYZ.z = vert.z;
+            if (vert.s[0] > maxXYZ.x) maxXYZ.s[0] = vert.s[0];
+            if (vert.s[1] > maxXYZ.s[1]) maxXYZ.s[1] = vert.s[1];
+            if (vert.s[2] > maxXYZ.s[2]) maxXYZ.s[2] = vert.s[2];
 
-            if (vert.x < minXYZ.x) minXYZ.x = vert.x;
-            if (vert.x < minXYZ.y) minXYZ.y = vert.y;
-            if (vert.x < minXYZ.z) minXYZ.z = vert.z;
+            if (vert.s[0] < minXYZ.s[0]) minXYZ.s[0] = vert.s[0];
+            if (vert.s[1] < minXYZ.s[1]) minXYZ.s[1] = vert.s[1];
+            if (vert.s[2] < minXYZ.s[2]) minXYZ.s[2] = vert.s[2];
         }
 
         //check for faces

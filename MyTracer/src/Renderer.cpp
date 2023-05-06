@@ -4,7 +4,8 @@
 #include "Renderer.h"
 #include "Walnut/Random.h"
 #include "PointLight.h"
-#include "CL/cl.hpp"
+
+#define NVIDIA
 
 constexpr float kEpsilon = 1e-8;
 
@@ -21,10 +22,10 @@ namespace utils
 	}
 	static uint32_t ConvertToRGBA_cl(const cl_float4 color)
 	{
-		uint8_t r = (uint8_t)(color.x * 255.0f);
-		uint8_t g = (uint8_t)(color.y * 255.0f);
-		uint8_t b = (uint8_t)(color.z * 255.0f);
-		uint8_t a = (uint8_t)(color.w * 255.0f);
+		uint8_t r = (uint8_t)(color.s[0] * 255.0f);
+		uint8_t g = (uint8_t)(color.s[1] * 255.0f);
+		uint8_t b = (uint8_t)(color.s[2] * 255.0f);
+		uint8_t a = (uint8_t)(color.s[3] * 255.0f);
 
 		return (a << 24) | (b << 16) | (g << 8) | r;
 	}
@@ -73,7 +74,7 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 
 	
 	size_t					work_size			= ray_directions.size();
-	size_t					NDRange				= work_size + work_group - (work_size % work_group);
+	const size_t			NDRange				= work_size + work_group - (work_size % work_group);
 
 	std::vector<struct Triangle> triangles		= triangles_X;							//KERNEL ARG
 	uint32_t*				temp_Image_Data		= new uint32_t[work_size];				//KERNEL ARG
@@ -82,6 +83,7 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 
 	// kernel-фаза ==================================================================================================================
 	
+#ifdef AMD
 	cl::Buffer triangles_buff(
 		context,
 		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
@@ -157,7 +159,91 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 		temp_Image_Data
 	);
 	cl::finish();
+#endif // AMD
 
+	cl_mem triangles_buff = clCreateBuffer(
+		context,
+		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+		sizeof(struct Triangle) * triangles.size(),
+		triangles.data(),
+		&err
+	);
+
+	cl_mem triangles_size_buff = clCreateBuffer(
+		context,
+		CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR,
+		sizeof(uint32_t),
+		&triangles_size,
+		&err
+	);
+
+	cl_mem ray_directions_buff = clCreateBuffer(
+		context,
+		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+		sizeof(cl_float3)* ray_directions.size(),
+		ray_directions.data(),
+		&err
+	);
+
+	cl_mem ray_origin_buff = clCreateBuffer(
+		context,
+		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+		sizeof(cl_float3),
+		&ray_origin,
+		&err
+	);
+
+	cl_mem output_color_buff = clCreateBuffer(
+		context,
+		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+		sizeof(*temp_Image_Data)* work_size,
+		nullptr,
+		&err
+	);
+
+	cl_mem dot_buff = clCreateBuffer(
+		context,
+		CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR,
+		sizeof(float)* gpu_debug_entities.size(),
+		gpu_debug_entities.data(),
+		&err
+	);
+
+	err = clSetKernelArg(kernel, 0, sizeof(triangles_buff), &triangles_buff);
+	err = clSetKernelArg(kernel, 1, sizeof(triangles_size_buff), &triangles_size_buff);
+	err = clSetKernelArg(kernel, 2, sizeof(ray_directions_buff), &ray_directions_buff);
+	err = clSetKernelArg(kernel, 3, sizeof(ray_origin_buff), &ray_origin_buff);
+	err = clSetKernelArg(kernel, 4, sizeof(output_color_buff), &output_color_buff);
+	err = clSetKernelArg(kernel, 5, sizeof(dot_buff), &dot_buff);
+	
+	err = clEnqueueNDRangeKernel(
+		queue,
+		kernel,
+		1,
+		NULL,
+		&NDRange, 0, NULL, NULL, NULL
+	);
+	err = clEnqueueReadBuffer(
+		queue, 
+		dot_buff,
+		CL_TRUE,
+		0,
+		sizeof(float) * gpu_debug_entities.size(),
+		gpu_debug_entities.data(),
+		NULL, NULL, NULL
+	);
+	err = clEnqueueReadBuffer(
+		queue,
+		output_color_buff,
+		CL_TRUE,
+		0,
+		sizeof(*temp_Image_Data) * work_size,
+		temp_Image_Data,
+		NULL, NULL, NULL
+	);
+
+	clFinish(queue);
+	
 	// payload-фаза ==================================================================================================================
 	 
 	m_FinalImage->SetData(temp_Image_Data);

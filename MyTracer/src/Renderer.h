@@ -6,12 +6,17 @@
 #include "Ray.h"
 #include "Scene.hpp"
 
+
+#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <filesystem>
 
-#include "CL/cl.hpp"
+#include "CL/cl.h"
 #include <vector>
+
+#define NVIDIA
+#define MAX_SOURCE_SIZE (0x100000)
 class Renderer
 {
 
@@ -19,6 +24,7 @@ public:
 	//Renderer() = default;
 	Renderer()
 	{
+#ifdef AMD
 		//std::string m_file = "RenderTest1";						// называть кернел также как .cl-файл
 		const char* m_file_ch = "R1";						// называть кернел также как .cl-файл
 
@@ -38,7 +44,7 @@ public:
 		this->context = context;
 
 		//Читаем kernel-код
-		std::ifstream helloWorldKernel("src/kernels/"+ (std::string)m_file_ch +".cl");
+		std::ifstream helloWorldKernel("src/kernels/" + (std::string)m_file_ch + ".cl");
 		if (helloWorldKernel.is_open())
 		{
 			std::string src
@@ -51,18 +57,60 @@ public:
 			cl::Program program(context, sources);
 			program.build("-cl-std=CL1.2");
 			this->program = program;
-			
+
 			cl::Kernel kernel(this->program, m_file_ch);
 			//cl::Kernel kernel(this->program, m_file);
 			this->kernel = kernel;
 			cl::CommandQueue queue(context, device);
-			this->queue = queue;	
+			this->queue = queue;
 		}
 		else
 		{
 			std::cout << "file is not opened\n";
 		}
+#endif // AMD
 
+#ifdef NVIDIA
+
+		cl_int err = 0;
+		const char* m_file_ch = "R1";
+
+		cl_platform_id platform;
+		cl_uint num_devices;
+		clGetPlatformIDs(1, &platform, &num_devices);
+
+		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &num_devices);
+
+		cl_context context = clCreateContext(0, num_devices, &device, NULL, NULL, &err);
+		this->context = context;
+
+		//Читаем kernel-код
+		char* sourcepath = "src/kernels/R1.cl";
+		FILE* fp = fopen(sourcepath, "r");
+		if (!fp) 
+		{
+			fprintf(stderr, "Failed to open kernel file '%s': %s\n", sourcepath, strerror(errno));
+		}
+
+		char* source_str = (char*)malloc(MAX_SOURCE_SIZE);
+		size_t source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
+
+		cl_program program = clCreateProgramWithSource(context,
+			1,
+			(const char**)&source_str,
+			&source_size, &err);
+
+		this->program = program;
+		err = clBuildProgram(this->program, num_devices, &device, NULL, NULL, NULL);
+
+		cl_kernel kernel = clCreateKernel(this->program, m_file_ch, &err);
+		this->kernel = kernel;
+
+		cl_command_queue queue = clCreateCommandQueue(context, device, 0, NULL);
+		this->queue = queue;
+		
+
+#endif // NVIDIA
 	}
 	//void Render(const Scene& scene, const Camera& camera);
 	void Render(const std::vector<Triangle> &triangles, const std::vector<size_t>& mesh_sizes, const Camera& camera);
@@ -79,12 +127,6 @@ private:
 		glm::vec3 WorldNormal;
 	};
 
-	//glm::vec4 PerPixel(uint32_t x, uint32_t y); //  ray gen
-	
-	//HitPayLoad TraceRay(const Ray& ray);
-	//HitPayLoad ClosestHit(const Ray& ray, float hitDistance, int meshIndex, int triangleIndex, float u, float v, glm::vec3 N);
-	//HitPayLoad Miss(const Ray& ray);
-
 private:
 	const Scene* m_ActiveScene = nullptr;
 	const Camera* m_ActiveCamera = nullptr;
@@ -92,10 +134,19 @@ private:
 	uint32_t* m_ImageData = nullptr;
 	std::vector<uint32_t> m_ImageHorisontalIter, m_ImageVerticalIter;
 
+#ifdef AMD
 	cl::Program			program;
 	cl::Context			context;
 	cl::Device			device;
 	cl::CommandQueue	queue;
 	cl::Kernel			kernel;
+#endif // AMD
+#ifdef NVIDIA
+	cl_program			program;
+	cl_context			context;
+	cl_device_id		device;
+	cl_command_queue	queue;
+	cl_kernel			kernel;
+#endif // NVIDIA
 	size_t				work_group = 256;
 };

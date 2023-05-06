@@ -1,11 +1,11 @@
-
-
 #define int_RED     4278190335      // 11111111 00000000 00000000 11111111
 #define int_GREEN   4278255360      // 11111111 00000000 11111111 00000000    
 #define int_BLUE    4294901760      // 11111111 11111111 00000000 00000000
 
 #define int_WHITE   4294967295      // 11111111 11111111 11111111 11111111 
 #define int_BLACK   4278190080      // 11111111 00000000 00000000 00000000
+
+#define BOUNCES 2
 
 struct Triangle
 {
@@ -29,9 +29,14 @@ float3 reflect(float3 ray_direction, float3 normal)
 float max_val(float val1, float val2)
 {
     if (val1 > val2)
+    {
         return val1;
+    } 
     else
+    {
         return val2;
+    }
+        
 }
 
 
@@ -65,7 +70,7 @@ float3 from_binary_to_RGB(uint color)
     return val;
 }
 
-// TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-
+// TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-\n
 
 bool TraceRay(
     __global struct Triangle* triangles,
@@ -115,18 +120,7 @@ bool TraceRay(
 
 // KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-
 
-__kernel void R1
-(
-    __global struct Triangle*           triangles,
-    __global uint*                      triangles_size,
-    __global float3*                    ray_directions,
-    __global float3*                    ray_origin,
-    __global uint*                      color_output,
-    __global float*                     debug_entity
-)
-{
-
-#define BOUNCES 2
+__kernel void R1(__global struct Triangle* triangles, __global uint* triangles_size, __global float3* ray_directions, __global float3* ray_origin, __global uint* color_output, __global float* debug_entity){
     
     uint global_id                   =  get_global_id(0);
 
@@ -177,7 +171,8 @@ __kernel void R1
                 {   // Если объект не закрывает тень, то считаем освещение
                     intersection_color *= cosangle * pointlight_intensity;
                     // Имитируем потерю энергии света при каждом отражении
-                    if (bounce_iter > 0){
+                    if (bounce_iter > 0)
+                    {
                         intersection_color *= reflectivity * bounce_iter;
                     }
                 }            
