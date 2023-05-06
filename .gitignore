@@ -8,7 +8,7 @@ Walnut/bin
 *.vcxproj
 *.vcxproj.user
 *.vcxproj.filters
-*.sln
+
 
 # Exclude
 !vendor/bin
