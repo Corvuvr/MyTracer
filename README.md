@@ -12,10 +12,10 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 - [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) (preferably a recent version)
 
 ## Getting Started
--Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files
--Open MyTracer.sln
--IF OPENCL BRANCH: click "Add existing property sheet" and add "OpenCL.props" file
--Run Releasex64 
+- [Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files]
+- [Open MyTracer.sln]
+- [IF OPENCL BRANCH: click "Add existing property sheet" and add "OpenCL.props" file]
+- [Run Releasex64]
 
 ### 3rd party libaries
 - [Dear ImGui](https://github.com/ocornut/imgui)
