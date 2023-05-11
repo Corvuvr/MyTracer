@@ -19,48 +19,92 @@ class ExampleLayer : public Walnut::Layer
 public:
 	ExampleLayer() : m_Camera(90.0f, 0.1f, 100.0f)  
 	{
+		{
+			Mesh mesh;
+			const char* path = "src/models/cube single.obj";
+			mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
+			mesh.loadMesh(path);
+			m_Scene.Meshes.push_back(mesh);
+		}		
+		{
+			Mesh mesh;
+			const char* path = "src/models/trianglepyramid.obj";
+			mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
+			mesh.loadMesh(path);
+			m_Scene.Meshes.push_back(mesh);
+		}		
+		{
+			Mesh mesh;
+			const char* path = "src/models/quadpyramid.obj";
+			mesh.loadMesh(path);
+			mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
+			m_Scene.Meshes.push_back(mesh);
+		}
+		{
+			Mesh mesh;
+			const char* path = "src/models/room.obj";
+			mesh.Mat.Albedo = glm::vec3(0.4f, .4f, .4f);
+			mesh.loadMesh(path);
+			m_Scene.Meshes.push_back(mesh);
+		}	
 		//{
 		//	Mesh mesh;
-		//	const char* path = "src/models/cube single.obj";
-		//	mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
-		//	mesh.loadMesh(path);
-		//	m_Scene.Meshes.push_back(mesh);
-		//}		
-		//{
-		//	Mesh mesh;
-		//	const char* path = "src/models/trianglepyramid.obj";
-		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
-		//	mesh.loadMesh(path);
-		//	m_Scene.Meshes.push_back(mesh);
-		//}		
-		//{
-		//	Mesh mesh;
-		//	const char* path = "src/models/quadpyramid.obj";
+		//	const char* path = "src/models/naturmonke.obj";
 		//	mesh.loadMesh(path);
 		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
 		//	m_Scene.Meshes.push_back(mesh);
 		//}
 		//{
 		//	Mesh mesh;
-		//	const char* path = "src/models/room.obj";
-		//	mesh.Mat.Albedo = glm::vec3(0.4f, .4f, .4f);
+		//	const char* path = "src/models/cube scene.obj";
 		//	mesh.loadMesh(path);
+		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
 		//	m_Scene.Meshes.push_back(mesh);
-		//}	
+		//}
+		//{
+		//	Mesh mesh;
+		//	const char* path = "src/models/comparison_test_1_monke.obj";
+		//	mesh.loadMesh(path);
+		//	mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
+		//	mesh.Mat.Roughness = 0.0f;
+		//	m_Scene.Meshes.push_back(mesh);
+		//}
+		//{
+		//	Mesh mesh;
+		//	const char* path = "src/models/comparison_test_1_scene.obj";
+		//	mesh.loadMesh(path);
+		//	mesh.Mat.Albedo = glm::vec3(0.0f, 1.0f, .0f);
+		//	mesh.Mat.Roughness = 0.0f;
+		//	m_Scene.Meshes.push_back(mesh);
+		//}
+		//{
+		//	Mesh mesh;
+		//	const char* path = "src/models/comparison_test_1_sphere.obj";
+		//	mesh.loadMesh(path);
+		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
+		//	mesh.Mat.Roughness = 0.0f;
+		//	m_Scene.Meshes.push_back(mesh);
+		//}
+		//{
+		//	Mesh mesh;
+		//	const char* path = "src/models/iso_room_1.obj";
+		//	mesh.loadMesh(path);
+		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
+		//	m_Scene.Meshes.push_back(mesh);
+		//}
+
+
+		for (size_t i = 0; i < m_Scene.Meshes.size(); ++i)
 		{
-			Mesh mesh;
-			const char* path = "src/models/naturmonke.obj";
-			mesh.loadMesh(path);
-			mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
-			m_Scene.Meshes.push_back(mesh);
+			m_triangles.insert
+			(
+				m_triangles.end(),
+				m_Scene.Meshes[i].Triangles.begin(),
+				m_Scene.Meshes[i].Triangles.end()
+			);
+			m_mesh_sizes.push_back(m_Scene.Meshes[i].Triangles.size());
 		}
-		{
-			Mesh mesh;
-			const char* path = "src/models/cube scene.obj";
-			mesh.loadMesh(path);
-			mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
-			m_Scene.Meshes.push_back(mesh);
-		}
+
 	}
 
 	virtual void OnUpdate(float ts) override
@@ -112,29 +156,19 @@ private:
 	uint32_t* m_ImageData = nullptr;
 	float m_LastRenderTime = 0;
 
+	std::vector<Triangle> m_triangles;
+	std::vector<size_t> m_mesh_sizes;
+
 	void Render()
 	{
 
 		Timer timer;
 		
-		std::vector<Triangle> m_triangles;
-		std::vector<size_t> m_mesh_sizes;
-		for (size_t i = 0; i < m_Scene.Meshes.size(); ++i)
-		{
-			m_triangles.insert
-			(
-				m_triangles.end(), 
-				m_Scene.Meshes[i].Triangles.begin(), 
-				m_Scene.Meshes[i].Triangles.end()
-			);
-			m_mesh_sizes.push_back(m_Scene.Meshes[i].Triangles.size());
-		}
-
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Renderer.Render(m_triangles, m_mesh_sizes, m_Camera);
 
-		std::cout << m_ViewportWidth << " x " << m_ViewportHeight << "\n";
+		//std::cout << m_ViewportWidth << " x " << m_ViewportHeight << "\n";
 
 		m_LastRenderTime = timer.ElapsedMillis();
 	}

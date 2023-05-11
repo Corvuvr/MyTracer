@@ -113,19 +113,19 @@ public:
 #endif // NVIDIA
 	}
 	//void Render(const Scene& scene, const Camera& camera);
-	void Render(const std::vector<Triangle> &triangles, const std::vector<size_t>& mesh_sizes, const Camera& camera);
+	void Render( std::vector<Triangle> &triangles, const std::vector<size_t>& mesh_sizes, const Camera& camera);
 	void OnResize(uint32_t width, uint32_t height);
 	std::shared_ptr<Walnut::Image> GetFinalImage() const { return m_FinalImage; }
 
 private:
-	struct HitPayLoad
-	{
-		float HitDistance;
-		float u = 0, v = 0;
-		int meshIndex, triangleIndex;
-		glm::vec3 WorldPos;
-		glm::vec3 WorldNormal;
-	};
+	//struct HitPayLoad
+	//{
+	//	float HitDistance;
+	//	float u = 0, v = 0;
+	//	int meshIndex, triangleIndex;
+	//	glm::vec3 WorldPos;
+	//	glm::vec3 WorldNormal;
+	//};
 
 private:
 	const Scene* m_ActiveScene = nullptr;

@@ -42,7 +42,7 @@ void Mesh::loadMesh(const char* filename)
 
             // getting minXYZ and maxXYZ
 
-            if (vert.s[0] > maxXYZ.x) maxXYZ.s[0] = vert.s[0];
+            if (vert.s[0] > maxXYZ.s[0]) maxXYZ.s[0] = vert.s[0];
             if (vert.s[1] > maxXYZ.s[1]) maxXYZ.s[1] = vert.s[1];
             if (vert.s[2] > maxXYZ.s[2]) maxXYZ.s[2] = vert.s[2];
 

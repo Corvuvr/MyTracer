@@ -11,6 +11,8 @@ public:
 	bool OnUpdate(float ts);
 	void OnResize(uint32_t width, uint32_t height);
 
+	const uint32_t GetResolution() const { return m_ViewportHeight * m_ViewportWidth; }
+
 	const glm::mat4& GetProjection() const { return m_Projection; }
 	const glm::mat4& GetInverseProjection() const { return m_InverseProjection; }
 	const glm::mat4& GetView() const { return m_View; }

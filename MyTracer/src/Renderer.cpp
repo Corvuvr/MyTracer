@@ -59,8 +59,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 		m_ImageVerticalIter[i] = i;
 }
 
-void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std::vector<size_t>& mesh_sizes, const Camera& camera)
+void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vector<size_t>& mesh_sizes, const Camera& camera)
 {
+
 	// prep-фаза ====================================================================================================================
 	m_ActiveCamera = &camera;
 
@@ -73,14 +74,15 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 	std::vector<cl_float3>	ray_directions		= m_ActiveCamera->GetClRayDirections();	//KERNEL ARG
 
 	
-	size_t					work_size			= ray_directions.size();
+	size_t					work_size			= camera.GetResolution(); //ray_directions.size();
 	const size_t			NDRange				= work_size + work_group - (work_size % work_group);
 
-	std::vector<struct Triangle> triangles		= triangles_X;							//KERNEL ARG
-	uint32_t*				temp_Image_Data		= new uint32_t[work_size];				//KERNEL ARG
-	uint32_t				triangles_size		= triangles.size();						//KERNEL ARG
+	//std::vector<struct Triangle> triangles		= triangles_X;							//KERNEL ARG
 	
-
+	uint32_t*				temp_Image_Data		= new uint32_t[work_size];				//KERNEL ARG
+	uint32_t				triangles_size		= triangles_X.size();						//KERNEL ARG
+	
+	
 	// kernel-фаза ==================================================================================================================
 	
 #ifdef AMD
@@ -160,12 +162,16 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 	);
 	cl::finish();
 #endif // AMD
+	
+	
+	
+	
 
 	cl_mem triangles_buff = clCreateBuffer(
 		context,
 		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
-		sizeof(struct Triangle) * triangles.size(),
-		triangles.data(),
+		sizeof(struct Triangle) * triangles_X.size(),
+		triangles_X.data(),
 		&err
 	);
 
@@ -243,10 +249,20 @@ void Renderer::Render(const std::vector<struct Triangle>& triangles_X, const std
 	);
 
 	clFinish(queue);
-	
+
 	// payload-фаза ==================================================================================================================
-	 
+	
+	clReleaseMemObject( triangles_buff);
+	clReleaseMemObject(triangles_size_buff);
+	clReleaseMemObject(ray_directions_buff);
+	clReleaseMemObject(ray_origin_buff);
+	clReleaseMemObject(output_color_buff);
+	clReleaseMemObject(dot_buff);
+
+
 	m_FinalImage->SetData(temp_Image_Data);
 	delete[] temp_Image_Data;
-
+	
 }
+
+

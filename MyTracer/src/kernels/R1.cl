@@ -125,7 +125,7 @@ __kernel void R1(__global struct Triangle* triangles, __global uint* triangles_s
     uint global_id                   =  get_global_id(0);
 
     float3  color_accumulation       =  {.0f, .0f, .0f};
-    float3  pointlight               =  {7.0f, 7.0f, -2.0f};
+    float3  pointlight               =  {2.0f, 3.0f, 4.0f};
     float   pointlight_intensity     =  1.0f;
     float   reflectivity             =  0.3f;
 
@@ -142,7 +142,7 @@ __kernel void R1(__global struct Triangle* triangles, __global uint* triangles_s
         
         if (TraceRay(triangles, *triangles_size, current_ray_direction, current_ray_origin, &hit_distance, &triangle_id))
         {
-            float3  hit_point        = *ray_origin + current_ray_direction * hit_distance;
+            float3  hit_point        = current_ray_origin + current_ray_direction * hit_distance;
             float3  face_normal      = cross(triangles[triangle_id].v1 - triangles[triangle_id].v0,
                                              triangles[triangle_id].v2 - triangles[triangle_id].v0);
 
