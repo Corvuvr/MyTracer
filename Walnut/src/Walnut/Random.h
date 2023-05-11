@@ -26,6 +26,8 @@ namespace Walnut {
 
 		static float Float()
 		{
+#undef max
+#undef min
 			return (float)s_Distribution(s_RandomEngine) / (float)std::numeric_limits<uint32_t>::max();
 		}
 

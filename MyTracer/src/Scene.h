@@ -4,6 +4,28 @@
 #include <string>
 #include "Ray.h"
 
+
+struct PointLight
+{
+	PointLight()
+	{
+		this->Origin = { 0.0f, 0.0f, 0.0f };
+	}
+	PointLight(glm::vec3 origin)
+	{
+		this->Origin = origin;
+	}
+	PointLight(glm::vec3 origin, float intensity)
+	{
+		this->Origin = origin;
+		this->intensity = intensity;
+	}
+	~PointLight() {};
+
+	glm::vec3 Origin;
+	float intensity = 1;
+};
+
 struct Material
 {
 	glm::vec3 Albedo{ 1.0f };
@@ -11,12 +33,12 @@ struct Material
 	float Metallic = 0.0f;
 };
 
-struct Sphere
-{
-	mutable glm::vec3 Pos{ 0.0f };
-	float Radius = 0.5f;
-	Material Mat;
-};
+//struct Sphere
+//{
+//	mutable glm::vec3 Pos{ 0.0f };
+//	float Radius = 0.5f;
+//	Material Mat;
+//};
 
 struct Triangle
 {
@@ -92,18 +114,15 @@ private:
 
 struct Mesh
 {
-	Mesh()
-	{
-	}
+	Mesh(){}
 	std::vector<Triangle> Triangles;
 	Material Mat;
 	void loadMesh(const char* filename);
 	BoundingBox boundingBox;
 };
 
-
 struct Scene
 {
-	std::vector<Sphere> Spheres;
+	//std::vector<Sphere> Spheres;
 	std::vector<Mesh> Meshes;
 };
