@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include "Camera.h"
 #include "Ray.h"
-#include "Scene.hpp"
+#include "Scene.h"
 
 
 #include <sstream>

@@ -1,4 +1,5 @@
 #pragma once
+#include "CL/cl.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
@@ -20,7 +21,9 @@ struct Sphere
 
 struct Triangle
 {
-	glm::vec3 v0, v1, v2;
+	cl_float3 v0;
+	cl_float3 v1;
+	cl_float3 v2;
 };
 
 class BoundingBox
@@ -92,15 +95,12 @@ private:
 
 struct Mesh
 {
-	Mesh()
-	{
-	}
-	std::vector<Triangle> Triangles;
+	Mesh(){}
+	std::vector<struct Triangle> Triangles;
 	Material Mat;
 	void loadMesh(const char* filename);
 	BoundingBox boundingBox;
 };
-
 
 struct Scene
 {
