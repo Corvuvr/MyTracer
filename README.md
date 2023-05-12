@@ -21,7 +21,7 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 ## Getting Started
 - [Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files]
 - [Open MyTracer.sln]
-- [IF OPENCL BRANCH: include opencl in project settings]
+- [IF OPENCL BRANCH: include opencl in MyTracer project settings]
 - [Run Releasex64]
 
 ## Adding Meshes
