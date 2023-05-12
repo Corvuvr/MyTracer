@@ -6,11 +6,7 @@
 #define TRIANGLES
 #define DEBUG_ON
 
-#include "PointLight.h"
-
-
 constexpr float kEpsilon = 1e-8;
-
 
 namespace utils
 {
@@ -39,6 +35,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 	delete[] m_ImageData;
 	m_ImageData = new uint32_t[width * height];
 
+	delete[] m_AccumulationData;
+	m_AccumulationData = new glm::vec4[width * height];
+
 	m_ImageHorisontalIter.resize(width);
 	m_ImageVerticalIter.resize(height);
 
@@ -49,16 +48,23 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 		m_ImageVerticalIter[i] = i;
 }
 
-void Renderer::Render(const Scene& scene, const Camera& camera)
+// функция Render запускается перед каждым новым кадром
+void Renderer::Render(const Scene& scene, const Camera& camera) 
 {
 	m_ActiveCamera = &camera;
 	m_ActiveScene = &scene;
 	
 	const glm::vec3& ray_origin = camera.GetPosition();
 
+	if (m_FrameIndex == 1)
+		memset(
+			m_AccumulationData, 
+			0, 
+			m_FinalImage->GetWidth() * m_FinalImage->GetHeight() * sizeof(glm::vec4)
+		);
+
 	std::for_each
 	(
-
 		std::execution::par,
 		m_ImageVerticalIter.begin(), 
 		m_ImageVerticalIter.end(),
@@ -66,84 +72,92 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 		{
 			for (uint32_t x = 0; x < m_FinalImage->GetWidth(); ++x)
 			{
-				glm::vec4 color = glm::clamp(PerPixel(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
-				m_ImageData[x + y * m_FinalImage->GetWidth()] = utils::ConvertToRGBA(color);
+				glm::vec4 color = PerPixel(x, y); //<------------------------ ВХОД В PerPixel()
+				m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
+
+				glm::vec4 accColor = m_AccumulationData[x + y * m_FinalImage->GetWidth()];
+				accColor /= (float)m_FrameIndex;
+
+				accColor = glm::clamp(accColor, glm::vec4(0.0f), glm::vec4(1.0f));
+				m_ImageData[x + y * m_FinalImage->GetWidth()] = utils::ConvertToRGBA(accColor);
 			}
 		}
 	);
 	m_FinalImage->SetData(m_ImageData);
-}
 
+	if (m_Settings.Accumulate)
+		m_FrameIndex++;
+	else
+		m_FrameIndex = 1;
+}
 
 glm::vec4 Renderer::PerPixel (uint32_t x, uint32_t y)
 {
-
 	Ray ray;
 	ray.Origin = m_ActiveCamera->GetPosition();
 	ray.Direction = m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 	
 	glm::vec3 color(0.0f);
 	glm::vec3 colorbuffer(0.0f);
-	int bounces = 1;
+	glm::vec3 color_res(0.0f);
+	int bounces = 2;
 	float multiplier = 1.0f;
 	float shadowMultiplier = 1.0f;
 	float fogmultiplier = 0.1f;
 	// количество отражений
 	for (int i = 0; i < bounces; ++i)
 	{
-		Renderer::HitPayLoad payload = TraceRay(ray);
+		Renderer::HitPayLoad payload = TraceRay(ray); // <--------------- ВХОД В TraceRay()
 		if (payload.HitDistance < 0.0f)
 		{
-			glm::vec3 SkyColor = glm::vec3(10.0f, 10.0f, 10.0f);
+			glm::vec3 SkyColor = glm::vec3(0.0f,0.0f,0.0f);
 			color += SkyColor * multiplier;
 			break;
 		}
-
-		// X -лево +право
-		// Y +вверх -вниз
-		// Z +на себя -от себя
-
-		//glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1)); // global lighting
-
-//		PointLight pl1(glm::vec3(1.5f, 2.0f, -2.0f));
-		PointLight pl1(glm::vec3(7.0f, 2.0f, -2.0f), 1);
+		PointLight pl1(glm::vec3(2.0f, 3.0f, 4.0f), 1);
 		glm::vec3 lightDir = payload.WorldPos - pl1.Origin;
 		float cosangle	=	glm::dot(-lightDir, payload.WorldNormal) 
 						/	(glm::length(payload.WorldNormal) * glm::length(lightDir)); 
 		cosangle = glm::max(cosangle, 0.0f);
 		
-
 		const Mesh& mesh = m_ActiveScene->Meshes[payload.meshIndex];
 		// если трегуольник повёрнут лицевой стороной:
 		if (glm::dot(ray.Direction, payload.WorldNormal) <= 0)
 		{
+			color += glm::vec3(cosangle) * pl1.intensity * mesh.Mat.Albedo;
+
 			Ray shadowRay;
 			shadowRay.Origin = payload.WorldPos + payload.WorldNormal * 0.0001f;
-			shadowRay.Direction = pl1.Origin - shadowRay.Origin;
-			Renderer::HitPayLoad shadowPayload = TraceRay(shadowRay);
+			shadowRay.Direction = pl1.Origin - shadowRay.Origin 
+				+ mesh.Mat.Roughness * Walnut::Random::Vec3(-0.05f, 0.05);
+
+			Renderer::HitPayLoad shadowPayload = TraceRay(shadowRay);//<---ВХОД В TraceRay()
 			if (shadowPayload.HitDistance < 1 && shadowPayload.HitDistance > 0)
 			{
-				return glm::vec4(mesh.Mat.Albedo * pl1.intensity * fogmultiplier, 1.0f);
+				color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			}
-			//color = glm::vec3(payload.u, payload.v, 1.0f - payload.u - payload.v);
-
-			color = glm::vec3(cosangle) * pl1.intensity * mesh.Mat.Albedo;
+			if (i > 0)
+			{
+				color *= 0.7f * i;
+			}
+			color_res = (color_res + color) / (float)(i + 1);
 		}
 		// определяем направление следующего луча (отражение)
 		ray.Origin = payload.WorldPos + payload.WorldNormal * 0.0001f; // P = O + t*D
 		ray.Direction = glm::reflect
 		(
 			ray.Direction,
-			payload.WorldNormal + mesh.Mat.Roughness * Walnut::Random::Vec3(-0.5f, 0.5)
+			glm::normalize(
+				payload.WorldNormal + mesh.Mat.Roughness 
+						* Walnut::Random::Vec3(-0.5f, 0.5)
+			)
 		);
 	}
-
-	return glm::vec4(color, 1.0f);
+	return glm::vec4(color_res, 1.0f);
 }
 
 Renderer::HitPayLoad Renderer::TraceRay(const Ray& ray)
 {
-
 	int closestTriangleIndex = -1, closestMeshIndex = -1;
 	float hit_distance = FLT_MAX;
 	float u, v, normalU, normalV;
@@ -153,7 +167,7 @@ Renderer::HitPayLoad Renderer::TraceRay(const Ray& ray)
 	for (size_t i = 0; i < m_ActiveScene->Meshes.size(); i++)
 	{
 		// bounding box intersiction
-		//if ((*m_ActiveScene).Meshes[i].boundingBox.has_intersect(ray)) continue;
+		if ((*m_ActiveScene).Meshes[i].boundingBox.has_intersect(ray)) continue;
 
 		for (size_t j = 0; j < m_ActiveScene->Meshes[i].Triangles.size(); j++)
 		{
@@ -198,10 +212,8 @@ Renderer::HitPayLoad Renderer::TraceRay(const Ray& ray)
 			}
 		}
 	}
-
 	if (closestTriangleIndex < 0) // пересечений с треугольником не обнаружено -> payload.HitDistance = -1.0f;
 		return Miss(ray);
-
 	return ClosestHit(ray, hit_distance, closestMeshIndex, closestTriangleIndex, normalU, normalV, normalPlaneNormal);
 }
 
@@ -213,14 +225,11 @@ Renderer::HitPayLoad Renderer::ClosestHit(const Ray& ray, float hitDistance, int
 	payload.triangleIndex = triangleIndex;
 	payload.u = u;
 	payload.v = v;
-
 	glm::vec3 P = ray.Origin + ray.Direction * hitDistance;
-	
 	payload.WorldPos = P;
 	payload.WorldNormal = N;
 	return payload;
 }
-
 Renderer::HitPayLoad Renderer::Miss(const Ray& ray)
 {
 	Renderer::HitPayLoad payload;
