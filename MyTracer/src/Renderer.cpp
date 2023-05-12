@@ -66,25 +66,21 @@ void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vec
 	m_ActiveCamera = &camera;
 
 	cl_int					err					=  0;
-	float					gpu_debug_entity	= -1;									//KERNEL ARG
-	std::vector<float>		gpu_debug_entities	= { -1, -1, -1, -1, -1, -1, -1, -1, -1 };			//KERNEL ARG
+	float					gpu_debug_entity	= -1;										
+	std::vector<float>		gpu_debug_entities	= { -1, -1, -1, -1, -1, -1, -1, -1, -1 };	//KERNEL ARG
 
 	glm::vec3				pos					= m_ActiveCamera->GetPosition();
-	cl_float3				ray_origin			= { pos.x, pos.y, pos.z };				//KERNEL ARG
-	std::vector<cl_float3>	ray_directions		= m_ActiveCamera->GetClRayDirections();	//KERNEL ARG
+	cl_float3				ray_origin			= { pos.x, pos.y, pos.z };					//KERNEL ARG
+	std::vector<cl_float3>	ray_directions		= m_ActiveCamera->GetClRayDirections();		//KERNEL ARG
 
-	
-	size_t					work_size			= camera.GetResolution(); //ray_directions.size();
+	size_t					work_size			= camera.GetResolution(); 
 	const size_t			NDRange				= work_size + work_group - (work_size % work_group);
-
-	//std::vector<struct Triangle> triangles		= triangles_X;							//KERNEL ARG
 	
-	uint32_t*				temp_Image_Data		= new uint32_t[work_size];				//KERNEL ARG
+	uint32_t*				temp_Image_Data		= new uint32_t[work_size];					//KERNEL ARG
 	uint32_t				triangles_size		= triangles_X.size();						//KERNEL ARG
 	
 	
 	// kernel-фаза ==================================================================================================================
-	
 #ifdef AMD
 	cl::Buffer triangles_buff(
 		context,
@@ -163,10 +159,6 @@ void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vec
 	cl::finish();
 #endif // AMD
 	
-	
-	
-	
-
 	cl_mem triangles_buff = clCreateBuffer(
 		context,
 		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
@@ -174,7 +166,6 @@ void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vec
 		triangles_X.data(),
 		&err
 	);
-
 	cl_mem triangles_size_buff = clCreateBuffer(
 		context,
 		CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR,
@@ -182,23 +173,20 @@ void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vec
 		&triangles_size,
 		&err
 	);
-
 	cl_mem ray_directions_buff = clCreateBuffer(
 		context,
-		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(cl_float3)* ray_directions.size(),
 		ray_directions.data(),
 		&err
 	);
-
 	cl_mem ray_origin_buff = clCreateBuffer(
 		context,
-		CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(cl_float3),
 		&ray_origin,
 		&err
 	);
-
 	cl_mem output_color_buff = clCreateBuffer(
 		context,
 		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
@@ -206,7 +194,6 @@ void Renderer::Render( std::vector<struct Triangle>& triangles_X, const std::vec
 		nullptr,
 		&err
 	);
-
 	cl_mem dot_buff = clCreateBuffer(
 		context,
 		CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR,

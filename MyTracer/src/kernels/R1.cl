@@ -14,7 +14,6 @@ struct Triangle
     float3 v2;
 } ;
 
-
 // UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-UTILS-
 
 inline float vec_len(float3 vec) 
@@ -36,9 +35,7 @@ float max_val(float val1, float val2)
     {
         return val2;
     }
-        
 }
-
 
 // COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-COLOR-
 
@@ -70,7 +67,7 @@ float3 from_binary_to_RGB(uint color)
     return val;
 }
 
-// TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-\n
+// TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-TRACE-RAY-
 
 bool TraceRay(
     __global struct Triangle* triangles,
@@ -118,17 +115,24 @@ bool TraceRay(
 }
 
 
+
+
+
 // KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-KERNEL-
 
-__kernel void R1(__global struct Triangle* triangles, __global uint* triangles_size, __global float3* ray_directions, __global float3* ray_origin, __global uint* color_output, __global float* debug_entity){
-    
+__kernel void R1(   __global struct     Triangle* triangles,
+                    __global uint*      triangles_size,
+                    __global float3*    ray_directions,
+                    __global float3*    ray_origin, 
+                    __global uint*      color_output, 
+                    __global float*     debug_entity
+){    
     uint global_id                   =  get_global_id(0);
 
     float3  color_accumulation       =  {.0f, .0f, .0f};
     float3  pointlight               =  {2.0f, 3.0f, 4.0f};
     float   pointlight_intensity     =  1.0f;
     float   reflectivity             =  0.3f;
-
     color_output[global_id]          =  int_BLACK; 
     
     float3  current_ray_direction    =   ray_directions[global_id];
@@ -176,14 +180,11 @@ __kernel void R1(__global struct Triangle* triangles, __global uint* triangles_s
                         intersection_color *= reflectivity * bounce_iter;
                     }
                 }            
-
                 color_accumulation += intersection_color;
                 color_output[global_id] = from_RGBA_to_binary(color_accumulation);
             }
-
             current_ray_direction = reflect(current_ray_direction, face_normal);
             current_ray_origin = hit_point + face_normal* 0.00005f;
-
         } else {
             break;
         }

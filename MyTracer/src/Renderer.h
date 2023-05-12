@@ -19,7 +19,6 @@
 #define MAX_SOURCE_SIZE (0x100000)
 class Renderer
 {
-
 public:
 	//Renderer() = default;
 	Renderer()
@@ -71,7 +70,6 @@ public:
 #endif // AMD
 
 #ifdef NVIDIA
-
 		cl_int err = 0;
 		const char* m_file_ch = "R1";
 
@@ -108,8 +106,6 @@ public:
 
 		cl_command_queue queue = clCreateCommandQueue(context, device, 0, NULL);
 		this->queue = queue;
-		
-
 #endif // NVIDIA
 	}
 	//void Render(const Scene& scene, const Camera& camera);

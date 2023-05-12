@@ -19,7 +19,7 @@ class ExampleLayer : public Walnut::Layer
 public:
 	ExampleLayer() : m_Camera(90.0f, 0.1f, 100.0f)  
 	{
-		{
+/*		{
 			Mesh mesh;
 			const char* path = "src/models/cube single.obj";
 			mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
@@ -46,7 +46,8 @@ public:
 			mesh.Mat.Albedo = glm::vec3(0.4f, .4f, .4f);
 			mesh.loadMesh(path);
 			m_Scene.Meshes.push_back(mesh);
-		}	
+		}*/
+
 		//{
 		//	Mesh mesh;
 		//	const char* path = "src/models/naturmonke.obj";
@@ -61,30 +62,30 @@ public:
 		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
 		//	m_Scene.Meshes.push_back(mesh);
 		//}
-		//{
-		//	Mesh mesh;
-		//	const char* path = "src/models/comparison_test_1_monke.obj";
-		//	mesh.loadMesh(path);
-		//	mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
-		//	mesh.Mat.Roughness = 0.0f;
-		//	m_Scene.Meshes.push_back(mesh);
-		//}
-		//{
-		//	Mesh mesh;
-		//	const char* path = "src/models/comparison_test_1_scene.obj";
-		//	mesh.loadMesh(path);
-		//	mesh.Mat.Albedo = glm::vec3(0.0f, 1.0f, .0f);
-		//	mesh.Mat.Roughness = 0.0f;
-		//	m_Scene.Meshes.push_back(mesh);
-		//}
-		//{
-		//	Mesh mesh;
-		//	const char* path = "src/models/comparison_test_1_sphere.obj";
-		//	mesh.loadMesh(path);
-		//	mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
-		//	mesh.Mat.Roughness = 0.0f;
-		//	m_Scene.Meshes.push_back(mesh);
-		//}
+		{
+			Mesh mesh;
+			const char* path = "src/models/comparison_test_1_monke.obj";
+			mesh.loadMesh(path);
+			mesh.Mat.Albedo = glm::vec3(1.0f, .0f, .0f);
+			mesh.Mat.Roughness = 0.0f;
+			m_Scene.Meshes.push_back(mesh);
+		}
+		{
+			Mesh mesh;
+			const char* path = "src/models/comparison_test_1_scene.obj";
+			mesh.loadMesh(path);
+			mesh.Mat.Albedo = glm::vec3(0.0f, 1.0f, .0f);
+			mesh.Mat.Roughness = 0.0f;
+			m_Scene.Meshes.push_back(mesh);
+		}
+		{
+			Mesh mesh;
+			const char* path = "src/models/comparison_test_1_sphere.obj";
+			mesh.loadMesh(path);
+			mesh.Mat.Albedo = glm::vec3(0.0f, .0f, 1.0f);
+			mesh.Mat.Roughness = 0.0f;
+			m_Scene.Meshes.push_back(mesh);
+		}
 		//{
 		//	Mesh mesh;
 		//	const char* path = "src/models/iso_room_1.obj";
