@@ -6,7 +6,11 @@
 #define TRIANGLES
 #define DEBUG_ON
 
+#include "PointLight.h"
+
+
 constexpr float kEpsilon = 1e-8;
+
 
 namespace utils
 {
@@ -35,9 +39,6 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 	delete[] m_ImageData;
 	m_ImageData = new uint32_t[width * height];
 
-	delete[] m_AccumulationData;
-	m_AccumulationData = new glm::vec4[width * height];
-
 	m_ImageHorisontalIter.resize(width);
 	m_ImageVerticalIter.resize(height);
 
@@ -55,9 +56,6 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 	
 	const glm::vec3& ray_origin = camera.GetPosition();
 
-	if (m_FrameIndex == 1)
-		memset(m_AccumulationData, 0, m_FinalImage->GetWidth() * m_FinalImage->GetHeight() * sizeof(glm::vec4));
-
 	std::for_each
 	(
 
@@ -68,23 +66,12 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 		{
 			for (uint32_t x = 0; x < m_FinalImage->GetWidth(); ++x)
 			{
-				glm::vec4 color = PerPixel(x, y);
-				m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
-
-				glm::vec4 accColor = m_AccumulationData[x + y * m_FinalImage->GetWidth()];
-				accColor /= (float)m_FrameIndex;
-
-				accColor = glm::clamp(accColor, glm::vec4(0.0f), glm::vec4(1.0f));
-				m_ImageData[x + y * m_FinalImage->GetWidth()] = utils::ConvertToRGBA(accColor);
+				glm::vec4 color = glm::clamp(PerPixel(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
+				m_ImageData[x + y * m_FinalImage->GetWidth()] = utils::ConvertToRGBA(color);
 			}
 		}
 	);
 	m_FinalImage->SetData(m_ImageData);
-
-	if (m_Settings.Accumulate)
-		m_FrameIndex++;
-	else
-		m_FrameIndex = 1;
 }
 
 
@@ -97,8 +84,7 @@ glm::vec4 Renderer::PerPixel (uint32_t x, uint32_t y)
 	
 	glm::vec3 color(0.0f);
 	glm::vec3 colorbuffer(0.0f);
-	glm::vec3 color_res(0.0f);
-	int bounces = 2;
+	int bounces = 1;
 	float multiplier = 1.0f;
 	float shadowMultiplier = 1.0f;
 	float fogmultiplier = 0.1f;
@@ -108,7 +94,7 @@ glm::vec4 Renderer::PerPixel (uint32_t x, uint32_t y)
 		Renderer::HitPayLoad payload = TraceRay(ray);
 		if (payload.HitDistance < 0.0f)
 		{
-			glm::vec3 SkyColor = glm::vec3(0.0f,0.0f,0.0f);
+			glm::vec3 SkyColor = glm::vec3(10.0f, 10.0f, 10.0f);
 			color += SkyColor * multiplier;
 			break;
 		}
@@ -117,7 +103,10 @@ glm::vec4 Renderer::PerPixel (uint32_t x, uint32_t y)
 		// Y +вверх -вниз
 		// Z +на себя -от себя
 
-		PointLight pl1(glm::vec3(0.0f, 1.7f, .2f), 1);
+		//glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1)); // global lighting
+
+//		PointLight pl1(glm::vec3(1.5f, 2.0f, -2.0f));
+		PointLight pl1(glm::vec3(7.0f, 2.0f, -2.0f), 1);
 		glm::vec3 lightDir = payload.WorldPos - pl1.Origin;
 		float cosangle	=	glm::dot(-lightDir, payload.WorldNormal) 
 						/	(glm::length(payload.WorldNormal) * glm::length(lightDir)); 
@@ -130,28 +119,22 @@ glm::vec4 Renderer::PerPixel (uint32_t x, uint32_t y)
 		{
 			Ray shadowRay;
 			shadowRay.Origin = payload.WorldPos + payload.WorldNormal * 0.0001f;
-			shadowRay.Direction = pl1.Origin - shadowRay.Origin + mesh.Mat.Roughness * Walnut::Random::Vec3(-0.05f, 0.05);
+			shadowRay.Direction = pl1.Origin - shadowRay.Origin;
 			Renderer::HitPayLoad shadowPayload = TraceRay(shadowRay);
 			if (shadowPayload.HitDistance < 1 && shadowPayload.HitDistance > 0)
 			{
 				return glm::vec4(mesh.Mat.Albedo * pl1.intensity * fogmultiplier, 1.0f);
 			}
 			//color = glm::vec3(payload.u, payload.v, 1.0f - payload.u - payload.v);
-			color += glm::vec3(cosangle) * pl1.intensity * mesh.Mat.Albedo;
-			if (i > 0)
-			{
-				color *= 0.5 * i;
-			}
-			
-			color_res = (color_res + color);
-			//color_res = color_res / (float)(i + 1);
+
+			color = glm::vec3(cosangle) * pl1.intensity * mesh.Mat.Albedo;
 		}
 		// определяем направление следующего луча (отражение)
 		ray.Origin = payload.WorldPos + payload.WorldNormal * 0.0001f; // P = O + t*D
 		ray.Direction = glm::reflect
 		(
 			ray.Direction,
-			glm::normalize(payload.WorldNormal + mesh.Mat.Roughness * Walnut::Random::Vec3(-0.5f, 0.5))
+			payload.WorldNormal + mesh.Mat.Roughness * Walnut::Random::Vec3(-0.5f, 0.5)
 		);
 	}
 
@@ -170,7 +153,7 @@ Renderer::HitPayLoad Renderer::TraceRay(const Ray& ray)
 	for (size_t i = 0; i < m_ActiveScene->Meshes.size(); i++)
 	{
 		// bounding box intersiction
-		if ((*m_ActiveScene).Meshes[i].boundingBox.has_intersect(ray)) continue;
+		//if ((*m_ActiveScene).Meshes[i].boundingBox.has_intersect(ray)) continue;
 
 		for (size_t j = 0; j < m_ActiveScene->Meshes[i].Triangles.size(); j++)
 		{
