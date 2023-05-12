@@ -19,6 +19,7 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 - [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) (preferably a recent version)
 
 ## Getting Started
+- [Install vulkan]
 - [Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files]
 - [Open MyTracer.sln]
 - [IF OPENCL BRANCH: include opencl in MyTracer project settings]
