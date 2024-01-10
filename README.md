@@ -46,4 +46,4 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 
 ### To Do
 - Auto installer
-- UI to upload meshes (currently meshes are hardcoded in ExampleLayer(), someday I will do it)
+- UI to upload meshes (currently meshes are hardcoded in ExampleLayer(), someday I will change that)
