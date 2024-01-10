@@ -43,3 +43,7 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 
 ### Additional
 - Walnut uses the [Roboto](https://fonts.google.com/specimen/Roboto) font ([Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0))
+
+### To Do
+- Auto installer
+- UI to upload meshes (currently meshes are hardcoded in ExampleLayer(), someday I will do it)
