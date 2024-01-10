@@ -1,5 +1,5 @@
 # MyTracer
-MyTracer is my university project about application of volumetric visualization algorithms with ray tracing without hardware support (Nvidia RT/AMD RA cores).
+MyTracer is my university project about application of volumetric visualization algorithms with ray tracing without hardware support (Nvidia RT/AMD RA cores) based on Walnut.
 
 Currently supports triangulated meshes in .obj format.
 
