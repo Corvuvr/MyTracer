@@ -11,15 +11,16 @@ Walnut is a simple application framework built with Dear ImGui and designed to b
 
 Currently supports Windows - with macOS and Linux support planned. Setup scripts support Visual Studio 2022 by default.
 
-![WalnutExample](https://hazelengine.com/images/ForestLauncherScreenshot.jpg)
+
 _<center>Forest Launcher - an application made with Walnut</center>_
 
 ## Requirements
 - [Visual Studio 2022](https://visualstudio.com) (not strictly required, however included setup scripts only support this)
 - [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) (preferably a recent version)
+- OpenCL library - [AMD](https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/releases) or [NVIDIA](https://developer.nvidia.com/opencl)
 
 ## Getting Started
-- [Install vulkan]
+- [Install vulkan and download OpenCL SDK]
 - [Once you've cloned, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files]
 - [Open MyTracer.sln]
 - [IF OPENCL BRANCH: include opencl in MyTracer project settings]
@@ -42,3 +43,7 @@ _<center>Forest Launcher - an application made with Walnut</center>_
 
 ### Additional
 - Walnut uses the [Roboto](https://fonts.google.com/specimen/Roboto) font ([Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0))
+
+### To Do
+- Auto installer
+- UI to upload meshes (currently meshes are hardcoded in ExampleLayer(), someday I will change that)
